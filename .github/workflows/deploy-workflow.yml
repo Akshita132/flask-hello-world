@@ -22,6 +22,6 @@ jobs:
       run: |
         ssh -o StrictHostKeyChecking=no azureuser@52.180.144.2 << 'EOF'
           cd ~/flask-hello-world
-          git pull origin main
+          git pull origin master
           sudo systemctl restart flask-hello-world
         EOF

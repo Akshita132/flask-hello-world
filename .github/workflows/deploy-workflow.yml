@@ -16,11 +16,18 @@ jobs:
     - name: Set up SSH
       uses: webfactory/ssh-agent@v0.5.3
       with:
-        ssh-private-key: ${{ secrets.AKSHITA_AZURE_SECRET }}
+        ssh-private-key: ${{ secrets.AKSHITA_AZURE_PEM }}
 
     - name: Deploy to VM
       run: |
-        ssh -o StrictHostKeyChecking=no azureuser@52.180.144.2 << 'EOF'
+        # Adding the SSH key to the SSH agent
+        echo "${{ secrets.AKSHITA_AZURE_PEM }}" > /tmp/akshita_vm.pem
+        chmod 600 /tmp/akshita_vm.pem
+        eval "$(ssh-agent -s)"
+        ssh-add /tmp/akshita_vm.pem
+
+        # SSH into the Azure VM and deploy
+        ssh -o StrictHostKeyChecking=no -i /tmp/akshita_vm.pem azureuser@52.180.144.2 << 'EOF'
           cd ~/flask-hello-world
           git pull origin master
           sudo systemctl restart flask-hello-world
